@@ -21,8 +21,8 @@ archive (ignorar arquivo no repo cuja função é guardar rastro anula o repo) �
 reusado** · archive que não é repo git. **Avisa:** nome fora de `AAAA-MM-DD-<slug>`, ausência de
 remote.
 
-**Ritmo (piso 26):** avisa `.ritmo.json` ausente ou malformado, `relatorios/` ausente, relatório fora de
-nome fora de AAAA-MM-DD_HHMM, `ultimo_relatorio` com mais de **30 min** e `ultimo_handoff` com mais de **6 h**.
+**Ritmo (piso 26):** avisa `.ritmo.json` ausente ou malformado, `relatorios/` ausente, relatório com
+nome fora do padrão data_hora, `ultimo_relatorio` com mais de **30 min** e `ultimo_handoff` com mais de **6 h**.
 Aviso, não reprova: carimbo velho é trabalho sem registro, não vazamento. Ao ver o aviso em trabalho
 ativo, grave o relatório/handoff na hora e renove o carimbo.
 
