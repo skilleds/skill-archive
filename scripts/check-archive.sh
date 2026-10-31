@@ -95,6 +95,34 @@ if [ -d "$raiz/overdev" ]; then
       || avisos+=("overdev/$b fora da convencao AAAA-MM-DD-CONTEXTO.md")
   done
 fi
+# --- 5b. ritmo de registro (engineering piso 26): relatorio 30 min, handoff 6 h ------------------
+# So AVISA (nao reprova): carimbo velho e sinal de trabalho sem registro, mas nao e vazamento.
+# Idade so importa em trabalho ativo; fora dele o aviso e informativo.
+if [ -d "$raiz/relatorios" ]; then
+  for f in "$raiz/relatorios"/*; do
+    [ -f "$f" ] || continue
+    b="$(basename "$f")"
+    case "$b" in README.md|.gitkeep) continue ;; esac
+    grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{4}\.md$' <<<"$b" \
+      || avisos+=("relatorios/$b fora da convencao AAAA-MM-DD_HHMM.md")
+  done
+else
+  avisos+=("relatorios/ ausente — piso 26: relatorio a cada 30 min em trabalho ativo (/archive-init cria)")
+fi
+if [ -f "$raiz/.ritmo.json" ]; then
+  agora=$(date +%s)
+  for par in "ultimo_relatorio|1800|30 min" "ultimo_handoff|21600|6 h"; do
+    chave="${par%%|*}"; resto="${par#*|}"; lim="${resto%%|*}"; rot="${resto#*|}"
+    val=$(grep -oE "\"$chave\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" "$raiz/.ritmo.json" | sed -E 's/.*:[[:space:]]*"([^"]*)"/\1/')
+    if [ -z "$val" ]; then avisos+=(".ritmo.json sem $chave (ISO-8601) — carimbo ausente"); continue; fi
+    ts=$(date -d "$val" +%s 2>/dev/null) || { avisos+=(".ritmo.json: $chave='$val' nao e ISO-8601"); continue; }
+    idade=$((agora-ts))
+    [ "$idade" -gt "$lim" ] && avisos+=("$chave com $((idade/60)) min — passou do limite de $rot (piso 26); se ha trabalho ativo, registre agora")
+  done
+else
+  avisos+=(".ritmo.json ausente — piso 26: carimbos {ultimo_relatorio, ultimo_handoff} (/archive-init cria)")
+fi
+
 if [ -d "$raiz/decisoes" ]; then
   declare -A vistos=()
   for f in "$raiz/decisoes"/*.md; do

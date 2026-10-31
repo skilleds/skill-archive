@@ -34,6 +34,21 @@ checa "e diz que verde nao e permissao" 0 "nao e permissao para colar .env" bash
 d="$TMP/naoarchive"; mkdir -p "$d"; echo x > "$d/leia.md"
 checa "diretorio que nao e archive sai 2" 2 "nao parece um" bash "$G" "$d"
 
+echo "== ritmo (piso 26) =="
+d="$(novo ritmo)"
+checa "sem .ritmo.json avisa" 0 ".ritmo.json ausente" bash "$G" "$d"
+checa "sem relatorios/ avisa" 0 "relatorios/ ausente" bash "$G" "$d"
+mkdir -p "$d/relatorios"; : > "$d/relatorios/2026-10-31_1000.md"
+printf '{"ultimo_relatorio":"2020-01-01T00:00:00Z","ultimo_handoff":"2020-01-01T00:00:00Z"}\n' > "$d/.ritmo.json"
+checa "carimbo de relatorio velho avisa" 0 "ultimo_relatorio com" bash "$G" "$d"
+checa "carimbo de handoff velho avisa" 0 "ultimo_handoff com" bash "$G" "$d"
+agora="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+printf '{"ultimo_relatorio":"%s","ultimo_handoff":"%s"}\n' "$agora" "$agora" > "$d/.ritmo.json"
+checa "carimbos frescos nao avisam" 0 "convencao de nome ok" bash "$G" "$d"
+if bash "$G" "$d" 2>&1 | grep -q "passou do limite"; then echo "  ✖ fresco avisou"; fail=$((fail+1)); else echo "  ✔ fresco sem aviso"; ok=$((ok+1)); fi
+: > "$d/relatorios/lixo.md"
+checa "relatorio fora da convencao avisa" 0 "relatorios/lixo.md fora da convencao" bash "$G" "$d"
+
 echo "== segredo =="
 d="$(novo auth)";  printf 'colei o curl:\nAuthorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\n' >> "$d/chats/2026-08-21-saneamento.md"
 checa "header Authorization colado reprova" 1 "header Authorization com credencial" bash "$G" "$d"

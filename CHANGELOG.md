@@ -3,6 +3,15 @@
 Todas as mudanças relevantes deste pacote, no formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 com versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [0.5.0] — 2026-10-31
+Ritmo de registro do archive (engineering piso 26; piso 25 = sem agents inúteis).
+
+### Adicionado
+- Planta do archive prevê `relatorios/` (relatório de andamento a cada 30 min, `AAAA-MM-DD_HHMM.md`) e `.ritmo.json` (`ultimo_relatorio`, `ultimo_handoff`, ISO-8601); `SKILL.md` e `references/archive.md` apontam para o piso 26 em vez de duplicá-lo.
+- `assets/relatorio.template.md`: feito com SHAs, em andamento, bloqueios/on-hold, próximos passos, agents vivos, desvios.
+- `/archive-init` cria `relatorios/` e o `.ritmo.json` inicial; `/archive-handoff` renova `ultimo_handoff`.
+- `check-archive.sh` (`/archive-check`) avisa `.ritmo.json`/`relatorios/` ausentes, nome fora de convenção e carimbos vencidos (relatório >30 min, handoff >6 h), com testes. Só avisa: carimbo velho é falta de registro, não vazamento.
+
 ## [0.4.0] — 2026-10-14
 Integração com as 8 skills novas (skill-dev, iam, api, payments, postgres, incident, analytics, git) e saneamento pelo gate novo.
 

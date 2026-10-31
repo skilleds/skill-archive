@@ -34,7 +34,17 @@ espelha `overdev/`. Se o projeto não tem archive, **criá-lo é o 1º item** �
   pentest/     # relatórios da schematize-pentest
   orchestration/ # checkpoints e briefs da orquestração (schematize-engineering)
   scaffold/    # relatórios do scaffold de projeto novo (schematize-scaffold)
+  relatorios/  # RELATÓRIO de andamento a cada 30 min em trabalho ativo: AAAA-MM-DD_HHMM.md
+               #   (modelo em assets/relatorio.template.md; engineering piso 26)
+  .ritmo.json  # carimbos {"ultimo_relatorio","ultimo_handoff"} em ISO-8601 (versionado, não ignorado)
 ```
+
+> **Ritmo de registro (engineering piso 26 — a regra mora lá, não é repetida aqui).** Em trabalho
+> ativo: RELATÓRIO a cada 30 min em `relatorios/` e HANDOFF a cada 6 h (e em fim de sessão, marco ou
+> compact) em `context/`, completo o bastante para uma sessão nova retomar só com ele
+> (`context.md` + `checklist.md`). Cada registro atualiza o carimbo em `.ritmo.json` e entra no git
+> na hora. O relatório lista os agents vivos; os sem pendência são encerrados (piso 25).
+> `/archive-check` avisa carimbo ausente ou vencido; `/archive-handoff` renova `ultimo_handoff`.
 
 > **`chats/` e `context/` são os DOIS lugares do rastro de sessão, e os dois são recuperáveis.**
 > A distinção: `chats/` é o bruto (mensagem a mensagem, gerado por máquina); `context/` é o handoff
