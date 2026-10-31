@@ -3,7 +3,7 @@ name = "schematize-archive"
 tag = "Base · Archive"
 status = "beta"
 order = 23
-current_version = "0.4.0"
+current_version = "0.5.0"
 href = "/archive"
 
 [descriptions]
