@@ -38,6 +38,12 @@ R="$W/vazio"; mkdir -p "$R/r_archive/chats" "$R/r_archive/context"
 OUT=$(bash "$S" "$R" 2>&1); z=$?
 if [ "$z" -eq 1 ] && grep -q 'ZERO historico recuperavel' <<<"$OUT"; then echo "  ✔ exit 1 e diz em voz alta"; else echo "  ✖ exit $z: $OUT"; rc=1; fi
 
+echo "── relatorios/ com on-hold entra na contagem (relatorio de 30 min nao pode ficar de fora)"
+T="$W/rel"; mkdir -p "$T/t_archive/relatorios"
+printf '# Relatorio\n- [~] item travado\n' > "$T/t_archive/relatorios/2026-10-31_1000.md"
+OUT=$(bash "$S" "$T" 2>&1)
+if grep -qE 'handoffs em relatorios/ +1 +1 com' <<<"$OUT"; then echo "  ✔ relatorio com [~] contado como ABERTO"; else echo "  ✖ relatorios/ ignorado: $OUT"; rc=1; fi
+
 echo
 [ $rc -eq 0 ] && echo "✔ collect-history.test.sh: todos os casos" || echo "✖ collect-history.test.sh: falhou"
 exit $rc

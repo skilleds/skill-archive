@@ -31,17 +31,18 @@ criticidade 0**, não um detalhe de fim de tarefa.
   `context/` (handoffs `AAAA-MM-DD-<slug>-context.md` — o FEITO-vs-ABERTO de cada sessão),
   `postmortems/` (um por incidente; rito em `schematize-incident → references/postmortem.md`),
   `context_agent/` (contexto portável), `plan/`, `scan/`, `qa/`, `audit/`, `pentest/`,
-  `orchestration/` e `scaffold/` (relatórios de cada skill), `relatorios/` (andamento a cada 30 min) e `.ritmo.json` (carimbos). Planta completa em `references/archive.md`. O operacional vivo é `.schematize/`; o **espelho durável é o archive**.
+  `orchestration/` e `scaffold/` (relatórios de cada skill), `relatorios/` (andamento a cada 30 min), `custos/` (`custos.{json,md}` do app, citados em cada relatório) e `.ritmo.json` (carimbos). Planta completa em `references/archive.md`. O operacional vivo é `.schematize/`; o **espelho durável é o archive**.
 - **Ritmo de registro** (`schematize-engineering` piso 26; piso 25 = sem agents inúteis): em trabalho
   ativo, **RELATÓRIO a cada 30 min** em `relatorios/` com nome data_hora (modelo: `assets/relatorio.template.md`)
   e **HANDOFF a cada 6 h** (e em fim de sessão/marco/compact) em `context/`. Carimbos em
   `.ritmo.json` (`ultimo_relatorio`, `ultimo_handoff`, ISO-8601). Tudo entra no git na hora.
+- **Trava de conclusão (piso 22):** o archive só está "entregue" com remote privado, árvore limpa e `HEAD == origin` (`check-archive.sh --conclusao`); relatório/handoff entram no git na hora. Herda os pisos 22–29 da `schematize-engineering` (git como trava de conclusão, deploy só do git, ops é o gate da IA, sem agents inúteis, relatório 30 min/handoff 6 h, CI remoto só antes do hml, microserviço autônomo, build em dev/hml + higiene).
 - **Nada de histórico só na cabeça/no chat volátil.** Decisão tomada → grava no archive. Plano feito →
   archive. Sessão que fez handoff → archive. É o que a schematize-audit depois COBRA.
 
 ## Comandos
 - **`/archive-init`** — materializa a estrutura obrigatória do `<projeto>/<projeto>_archive/` e checa o que falta
-- **`/archive-check`** — o gate do archive (inclui a idade dos carimbos do ritmo, 30 min/6 h): segredo/PII/binário/`.gitignore` interno/ADR duplicado/convenção de nome, com o procedimento de **recuperação** ensaiado ao lado (`scripts/check-archive.sh`)
+- **`/archive-check`** — o gate do archive (remote privado obrigatório; `--ativo`: ritmo 30 min/6 h reprova; `--conclusao`: árvore limpa + `HEAD == origin`): segredo/PII/binário/`.gitignore` interno/ADR duplicado/convenção de nome, com o procedimento de **recuperação** ensaiado ao lado (`scripts/check-archive.sh`)
   (nunca deixa o archive ausente). Ver `references/archive.md`.
 - **`/archive-todos`** — o principal: **gera afazeres pro overdev a partir do histórico recuperável**.
   Varre o archive + git, enumera o ABERTO/prometido-e-não-provado, e deriva o

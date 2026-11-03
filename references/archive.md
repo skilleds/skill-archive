@@ -36,6 +36,8 @@ espelha `overdev/`. Se o projeto não tem archive, **criá-lo é o 1º item** �
   scaffold/    # relatórios do scaffold de projeto novo (schematize-scaffold)
   relatorios/  # RELATÓRIO de andamento a cada 30 min em trabalho ativo: AAAA-MM-DD_HHMM.md
                #   (modelo em assets/relatorio.template.md; engineering piso 26)
+  custos/      # custos.json + custos.md (+ ledger append-only) do app: `schematize cost sync|report|show`;
+               #   estimativa API-equivalente por modelo/dia/semana/task; cada relatório cita período e acumulado
   .ritmo.json  # carimbos {"ultimo_relatorio","ultimo_handoff"} em ISO-8601 (versionado, não ignorado)
 ```
 
@@ -110,6 +112,8 @@ em kebab-case, sem espaço, sem acento, sem maiúscula.
 | `postmortems/` | `AAAA-MM-DD-inc-NNN-<slug>.md` (`schematize-incident → references/postmortem.md`) | 2026-10-14-inc-001-queda-auth.md |
 | `plan/` · `scan/` · `qa/` · `audit/` · `pentest/` · `orchestration/` · `scaffold/` | `AAAA-MM-DD-<slug>.md` | 2026-08-21-gate-owasp.md |
 | `overdev/` (briefing) | AAAA-MM-DD-CONTEXTO.md | 2026-10-14-CONTEXTO.md |
+| `relatorios/` | data_hora com underscore, extensão md: AAAA-MM-DD_HHMM (vários por dia) | 2026-10-31_1430.md |
+| `custos/` · `.ritmo.json` | nome fixo (custos.json e custos.md na pasta; o carimbo na raiz) | — |
 | `index/` | nome fixo: MAPA.md, INDEX_GLOBAL.md, … | — |
 
 **Por que a data na frente:** ordenação alfabética = ordenação cronológica, em qualquer ferramenta,

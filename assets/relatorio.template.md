@@ -7,6 +7,10 @@
 ## Feito (com SHAs)
 - `<sha>` <repo> — <o que mudou>
 
+## Custo (período / acumulado)
+<!-- Piso 26: leia de <projeto>_archive/custos/ (`schematize cost report`). Estimativa API-equivalente; confira o /usage. -->
+- período: US$ <x> (<tokens>) · acumulado: US$ <y>
+
 ## Em andamento
 - [ ] <item> — <estado, quem (agent) cuida>
 
@@ -23,3 +27,6 @@
 
 ## Desvios
 - <o que divergiu do plano e por quê; "nenhum" se nada>
+
+## Git (piso 22)
+- Commit/push do archive: `<sha>` · `HEAD == origin`: [ ] (`check-archive.sh --conclusao`)

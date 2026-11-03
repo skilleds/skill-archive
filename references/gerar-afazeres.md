@@ -14,6 +14,8 @@ pra rodar sob o overdev. É a ponte "história → próximo trabalho".
   os comandos `/<slug>-cc` e `/<slug>-handoff` gravam e `chats/` é o
   rastro bruto. Varrer só um devolve vazio sem erro, que é o pior modo de falha de uma skill de
   auditoria (achado B1 da vistoria de 2026-08-21).
+- `<projeto>/<projeto>_archive/relatorios/*` (relatórios de 30 min): `- [ ]` em andamento e `- [~]` on-hold dali
+  também são ABERTO — o relatório é onde o on-hold registrado no meio da sessão sobrevive. Varra-os junto.
 - **Se as duas pastas estiverem vazias ou ausentes, DIGA ISSO** — "0 handoffs encontrados em
   `chats/` e `context/`" — nunca produza um checklist curto como se a história fosse curta.
 - Histórico git: TODOs/FIXMEs introduzidos e não resolvidos; promessas em mensagens de commit.

@@ -16,6 +16,14 @@ checa() { local nome="$1" esp="$2" agulha="$3"; shift 3
   if [ -n "$agulha" ] && ! grep -qF -- "$agulha" <<<"$saida"; then echo "  ✖ $nome: exit certo, saida sem \"$agulha\""; sed 's/^/      /' <<<"$saida"; fail=$((fail+1)); return; fi
   echo "  ✔ $nome"; ok=$((ok+1)); }
 
+# gh de mentira: visibilidade controlada por STUB_PRIVATE (true|false|erro). Nunca toca a rede.
+mkdir -p "$TMP/stubs"
+cat > "$TMP/stubs/gh" <<'GH'
+#!/usr/bin/env bash
+case "${STUB_PRIVATE:-true}" in true) echo true ;; false) echo false ;; *) exit 1 ;; esac
+GH
+chmod +x "$TMP/stubs/gh"; export PATH="$TMP/stubs:$PATH"
+
 novo() { # $1 = nome do fixture -> ecoa o caminho
   local d="$TMP/$1"; rm -rf "$d"; mkdir -p "$d"/{chats,context,decisoes,overdev}
   printf '# sessao\n\nfizemos o gate do archive.\n' > "$d/chats/2026-08-21-saneamento.md"
@@ -110,6 +118,34 @@ echo "== repo proprio =="
 d="$(novo semgit)"; rm -rf "$d/.git"
 checa "archive que nao e repo git reprova" 1 "repo PROPRIO e PRIVADO" bash "$G" "$d"
 d="$(novo semremote)"; git -C "$d" remote remove origin 2>/dev/null
-checa "sem remote avisa (nao sobrevive a maquina)" 0 "nao sobrevive a perda da maquina" bash "$G" "$d"
+checa "sem remote REPROVA (piso 22: nao sobrevive a maquina)" 1 "nao sobrevive a perda da maquina" bash "$G" "$d"
+d="$(novo publico)"
+export STUB_PRIVATE=false; checa "remote PUBLICO reprova" 1 "PUBLICO" bash "$G" "$d"
+export STUB_PRIVATE=erro; checa "visibilidade nao confirmavel so avisa" 0 "nao foi possivel confirmar" bash "$G" "$d"
+export STUB_PRIVATE=true; checa "remote privado passa" 0 "convencao de nome ok" bash "$G" "$d"; unset STUB_PRIVATE
+
+echo "== --conclusao (piso 22) e --ativo (piso 26) =="
+d="$(novo concl)"; mkdir -p "$d/custos"
+git init -q --bare "$TMP/concl-remoto.git"; git -C "$d" remote set-url origin "$TMP/concl-remoto.git"
+git -C "$d" -c user.name=t -c user.email=t@t add -A; git -C "$d" -c user.name=t -c user.email=t@t commit -qm i; git -C "$d" push -q -u origin HEAD 2>/dev/null
+checa "conclusao com tudo empurrado passa" 0 "convencao de nome ok" bash "$G" --conclusao "$d"
+echo y > "$d/chats/2026-08-22-novo.md"
+checa "conclusao com arvore suja REPROVA" 1 "arvore do archive suja" bash "$G" --conclusao "$d"
+git -C "$d" -c user.name=t -c user.email=t@t add -A; git -C "$d" -c user.name=t -c user.email=t@t commit -qm j
+checa "conclusao com commit nao empurrado REPROVA" 1 "HEAD do archive != origin" bash "$G" --conclusao "$d"
+checa "sem --conclusao a arvore/commit pendente passa (pre-commit)" 0 "convencao de nome ok" bash "$G" "$d"
+d="$(novo semcustos)"
+checa "custos/ ausente avisa" 0 "custos/ ausente" bash "$G" "$d"
+checa "custos/ ausente REPROVA na conclusao" 1 "custos/ ausente" bash "$G" --conclusao "$d"
+mkdir -p "$d/custos"; printf '{quebrado' > "$d/custos/custos.json"
+checa "custos.json invalido reprova" 1 "custos/custos.json nao e JSON valido" bash "$G" "$d"
+printf '{"total_usd": 1.5}\n' > "$d/custos/custos.json"
+checa "custos.json valido passa" 0 "convencao de nome ok" bash "$G" "$d"
+d="$(novo ativo)"
+checa "sem ritmo, --ativo REPROVA" 1 ".ritmo.json ausente" bash "$G" --ativo "$d"
+mkdir -p "$d/relatorios"; : > "$d/relatorios/2026-10-31_1000.md"
+printf '{"ultimo_relatorio":"2020-01-01T00:00:00Z",\n "ultimo_handoff":"2020-01-01T00:00:00Z"}\n' > "$d/.ritmo.json"
+checa "carimbo velho (JSON em 2 linhas), --ativo REPROVA" 1 "ultimo_relatorio com" bash "$G" --ativo "$d"
+checa "carimbo velho sem --ativo so avisa" 0 "ultimo_relatorio com" bash "$G" "$d"
 
 echo; echo "check-archive: $ok ok, $fail falha(s)"; [ "$fail" = 0 ]

@@ -3,6 +3,16 @@
 Todas as mudanças relevantes deste pacote, no formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 com versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [Não lançado]
+### Adicionado
+- `custos/` (`custos.{json,md}` do app) na planta, no `/archive-init`, na lista do que mora, no check (JSON válido) e seção "Custo (período / acumulado)" + linha de commit/push no `relatorio.template.md` (piso 26).
+- `check-archive.sh --conclusao` (piso 22: árvore limpa, `HEAD == origin`, upstream, `custos/` obrigatório) e `--ativo` (ritmo ausente/vencido reprova, mesma semântica do `check-ritmo.sh` da engineering; sem flag segue aviso para não travar o pre-commit).
+- `collect-history.sh` e `/archive-todos` varrem `relatorios/` (itens `- [ ]`/`- [~]` dos relatórios de 30 min) — com teste.
+- Bloco "Herda os pisos 22–29"; linha de `relatorios/`, `custos/` e `.ritmo.json` na tabela de convenção de nome.
+### Corrigido
+- Archive sem remote `origin` agora REPROVA (antes só avisava) e remote PÚBLICO reprova (com `gh`); `/archive-init` manda `postmortems/`, `custos/` e termina com o 1º push.
+- `.ritmo.json` em várias linhas deixou de virar "carimbo ausente"; hook pre-commit do `archive-check` aceita `GIT_GATE_ARCHIVE`.
+
 ## [0.5.0] — 2026-10-31
 Ritmo de registro do archive (engineering piso 26; piso 25 = sem agents inúteis).
 

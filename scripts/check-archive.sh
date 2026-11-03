@@ -6,13 +6,23 @@
 # VERDE AQUI NAO E PERMISSAO PARA COLAR `.env` — e so a ultima checagem antes de um commit que,
 # uma vez feito, nao se desfaz (segredo commitado esta vazado; a acao e ROTACIONAR).
 #
-# uso: check-archive.sh [dir-do-archive]   ·  0 = passa · 1 = REPROVA · 2 = nao e um archive
+# uso: check-archive.sh [--ativo] [--conclusao] [dir-do-archive]   ·  0 = passa · 1 = REPROVA · 2 = nao e um archive
+#   (sem flag = modo pre-commit: arvore suja e normal, ritmo vencido so avisa)
+#   --ativo      sessao em andamento: ritmo ausente/vencido (relatorio 30 min, handoff 6 h) REPROVA (piso 26)
+#   --conclusao  trava de conclusao (piso 22): arvore limpa e HEAD == origin, senao REPROVA; custos/ obrigatorio
+# Sempre: remote 'origin' obrigatorio (ERRO) e, com `gh`, repo PRIVADO (publico REPROVA); custos/custos.json valido.
 # EXCEÇÃO DECLARADA de strict mode (`schematize-shell` -> `references/piso.md` secao 1):
 # este script é um COLETOR — ele varre tudo e SOMA os achados. Com `set -e` abortaria no
 # primeiro problema e reportaria um, escondendo os outros. Por isso `set -uo pipefail` sem `-e`.
 set -uo pipefail
-raiz="${1:-.}"
+ATIVO=0; CONCLUSAO=0; raiz=""
+for a in "$@"; do
+  case "$a" in --ativo) ATIVO=1 ;; --conclusao) CONCLUSAO=1 ;; *) raiz="$a" ;; esac
+done
+raiz="${raiz:-.}"
 erros=(); avisos=()
+# ritmo(): vencido/ausente e ERRO com --ativo, senao so aviso
+ritmo() { if [ "$ATIVO" = 1 ]; then erros+=("$1"); else avisos+=("$1"); fi; }
 
 # Reconhece o archive pela planta, nao pelo nome do diretorio (o nome varia com o projeto).
 if [ ! -d "$raiz/chats" ] && [ ! -d "$raiz/decisoes" ] && [ ! -d "$raiz/overdev" ]; then
@@ -107,20 +117,32 @@ if [ -d "$raiz/relatorios" ]; then
       || avisos+=("relatorios/$b fora da convencao AAAA-MM-DD_HHMM.md")
   done
 else
-  avisos+=("relatorios/ ausente — piso 26: relatorio a cada 30 min em trabalho ativo (/archive-init cria)")
+  ritmo "relatorios/ ausente — piso 26: relatorio a cada 30 min em trabalho ativo (/archive-init cria)"
 fi
 if [ -f "$raiz/.ritmo.json" ]; then
   agora=$(date +%s)
   for par in "ultimo_relatorio|1800|30 min" "ultimo_handoff|21600|6 h"; do
     chave="${par%%|*}"; resto="${par#*|}"; lim="${resto%%|*}"; rot="${resto#*|}"
-    val=$(grep -oE "\"$chave\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" "$raiz/.ritmo.json" | sed -E 's/.*:[[:space:]]*"([^"]*)"/\1/')
-    if [ -z "$val" ]; then avisos+=(".ritmo.json sem $chave (ISO-8601) — carimbo ausente"); continue; fi
-    ts=$(date -d "$val" +%s 2>/dev/null) || { avisos+=(".ritmo.json: $chave='$val' nao e ISO-8601"); continue; }
+    # tr -d '\n': aceita JSON em varias linhas (jq nao e requisito)
+    val=$(tr -d '\n' < "$raiz/.ritmo.json" | grep -oE "\"$chave\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" | sed -E 's/.*:[[:space:]]*"([^"]*)"/\1/')
+    if [ -z "$val" ]; then ritmo ".ritmo.json sem $chave (ISO-8601) — carimbo ausente"; continue; fi
+    ts=$(date -d "$val" +%s 2>/dev/null) || { ritmo ".ritmo.json: $chave='$val' nao e ISO-8601"; continue; }
     idade=$((agora-ts))
-    [ "$idade" -gt "$lim" ] && avisos+=("$chave com $((idade/60)) min — passou do limite de $rot (piso 26); se ha trabalho ativo, registre agora")
+    [ "$idade" -gt "$lim" ] && ritmo "$chave com $((idade/60)) min — passou do limite de $rot (piso 26); se ha trabalho ativo, registre agora"
   done
 else
-  avisos+=(".ritmo.json ausente — piso 26: carimbos {ultimo_relatorio, ultimo_handoff} (/archive-init cria)")
+  ritmo ".ritmo.json ausente — piso 26: carimbos {ultimo_relatorio, ultimo_handoff} (/archive-init cria)"
+fi
+# --- 5c. custos/ (piso 26): ledger do app, custo do periodo e acumulado entram em cada relatorio -----
+if [ -d "$raiz/custos" ]; then
+  if [ -f "$raiz/custos/custos.json" ]; then
+    if command -v jq >/dev/null 2>&1; then jq -e . "$raiz/custos/custos.json" >/dev/null 2>&1 || erros+=("custos/custos.json nao e JSON valido")
+    elif command -v python3 >/dev/null 2>&1; then python3 -c 'import json,sys; json.load(open(sys.argv[1]))' "$raiz/custos/custos.json" 2>/dev/null || erros+=("custos/custos.json nao e JSON valido")
+    fi
+  fi
+else
+  if [ "$CONCLUSAO" = 1 ]; then erros+=("custos/ ausente — piso 26: custos.{json,md} do app (schematize cost sync|report) entram em cada relatorio")
+  else avisos+=("custos/ ausente — piso 26: custos.{json,md} do app (schematize cost sync|report); /archive-init cria"); fi
 fi
 
 if [ -d "$raiz/decisoes" ]; then
@@ -140,10 +162,25 @@ if [ -d "$raiz/decisoes" ]; then
   done
 fi
 
-# --- 6. o archive e repo git PRIVADO proprio ----------------------------------------------------
+# --- 6. o archive e repo git PRIVADO proprio, com remote e (na conclusao) tudo empurrado -----------
 if [ -d "$raiz/.git" ]; then
   remoto=$(git -C "$raiz" remote get-url origin 2>/dev/null || true)
-  [ -n "$remoto" ] || avisos+=("archive sem remote 'origin' — repo local nao sobrevive a perda da maquina")
+  if [ -z "$remoto" ]; then
+    erros+=("archive sem remote 'origin' — repo local nao sobrevive a perda da maquina (piso 22): gh repo create <org>/<projeto>_archive --private e push")
+  elif command -v gh >/dev/null 2>&1 && [[ "$remoto" == *github.com* ]]; then
+    priv=$(gh repo view "$remoto" --json isPrivate -q .isPrivate 2>/dev/null || true)
+    case "$priv" in
+      true) ;;
+      false) erros+=("o remote do archive e PUBLICO — o archive guarda transcript de sessao: torne-o privado AGORA (gh repo edit --visibility private)") ;;
+      *) avisos+=("nao foi possivel confirmar que o remote do archive e privado (gh sem acesso/rede) — confira a visibilidade") ;;
+    esac
+  fi
+  if [ "$CONCLUSAO" = 1 ]; then
+    [ -z "$(git -C "$raiz" status --porcelain 2>/dev/null)" ] || erros+=("arvore do archive suja — commit + push antes de concluir (piso 22)")
+    if git -C "$raiz" rev-parse -q --verify '@{u}' >/dev/null 2>&1; then
+      [ "$(git -C "$raiz" rev-parse HEAD 2>/dev/null)" = "$(git -C "$raiz" rev-parse '@{u}')" ] || erros+=("HEAD do archive != origin — commits por empurrar (ou local atrasado); push antes de concluir (piso 22)")
+    else erros+=("archive sem upstream — git push -u origin <branch> antes de concluir (piso 22)"); fi
+  fi
 else
   erros+=("$raiz nao e repo git — o archive e um repo PROPRIO e PRIVADO, nao uma pasta")
 fi

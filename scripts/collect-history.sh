@@ -62,10 +62,10 @@ linha "checklist: itens '- [H ]' (humano)" "$humanos"
 linha "checklist: itens '- [~]' (on-hold = ABERTO)" "$onhold"
 
 # 2) handoffs — os DOIS diretorios. Varrer so um foi o defeito B1.
-for d in chats context; do
+for d in chats context relatorios; do
   n=0; [ -n "$ARCH" ] && [ -d "$ARCH/$d" ] && n="$(find "$ARCH/$d" -type f -name '*.md' 2>/dev/null | wc -l)"
   n_ab=0
-  [ "$n" -gt 0 ] && n_ab="$(conta_grep 'EM ABERTO|ABERTO|proximos passos|próximos passos' "$ARCH/$d")"
+  [ "$n" -gt 0 ] && n_ab="$(conta_grep 'EM ABERTO|ABERTO|proximos passos|próximos passos|^[[:space:]]*- \[( |~)\]' "$ARCH/$d")"
   linha "handoffs em $d/" "$n" "$n_ab com secao ABERTO"
 done
 
