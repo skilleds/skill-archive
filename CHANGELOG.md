@@ -12,7 +12,7 @@ com versionamento [SemVer](https://semver.org/lang/pt-BR/).
 ### Corrigido
 - Archive sem remote `origin` agora REPROVA (antes só avisava) e remote PÚBLICO reprova (com `gh`); `/archive-init` manda `postmortems/`, `custos/` e termina com o 1º push.
 - `.ritmo.json` em várias linhas deixou de virar "carimbo ausente"; hook pre-commit do `archive-check` aceita `GIT_GATE_ARCHIVE`.
-
+- gate de shell: `rm -rf` do teste com `${d:?}` (variável vazia nunca vira `/`).
 ## [0.5.0] — 2026-10-31
 Ritmo de registro do archive (engineering piso 26; piso 25 = sem agents inúteis).
 

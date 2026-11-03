@@ -25,7 +25,7 @@ GH
 chmod +x "$TMP/stubs/gh"; export PATH="$TMP/stubs:$PATH"
 
 novo() { # $1 = nome do fixture -> ecoa o caminho
-  local d="$TMP/$1"; rm -rf "$d"; mkdir -p "$d"/{chats,context,decisoes,overdev}
+  local d="$TMP/$1"; rm -rf "${d:?}"; mkdir -p "$d"/{chats,context,decisoes,overdev}
   printf '# sessao\n\nfizemos o gate do archive.\n' > "$d/chats/2026-08-21-saneamento.md"
   printf '# handoff\n' > "$d/context/2026-08-21-fase-b-context.md"
   printf '# ADR-0001\n' > "$d/decisoes/ADR-0001-planta-unica.md"
@@ -115,7 +115,7 @@ d="$(novo odv)"; printf '# x\n' > "$d/overdev/2026-10-14-CONTEXTO.md"
 checa "overdev/2026-10-14-CONTEXTO.md passa" 0 "convencao de nome ok" bash "$G" "$d"
 
 echo "== repo proprio =="
-d="$(novo semgit)"; rm -rf "$d/.git"
+d="$(novo semgit)"; rm -rf "${d:?}/.git"
 checa "archive que nao e repo git reprova" 1 "repo PROPRIO e PRIVADO" bash "$G" "$d"
 d="$(novo semremote)"; git -C "$d" remote remove origin 2>/dev/null
 checa "sem remote REPROVA (piso 22: nao sobrevive a maquina)" 1 "nao sobrevive a perda da maquina" bash "$G" "$d"
