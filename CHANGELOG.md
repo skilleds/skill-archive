@@ -3,7 +3,7 @@
 Todas as mudanças relevantes deste pacote, no formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/),
 com versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
-## [Não lançado]
+## [0.6.0] — 2026-11-03
 ### Adicionado
 - `custos/` (`custos.{json,md}` do app) na planta, no `/archive-init`, na lista do que mora, no check (JSON válido) e seção "Custo (período / acumulado)" + linha de commit/push no `relatorio.template.md` (piso 26).
 - `check-archive.sh --conclusao` (piso 22: árvore limpa, `HEAD == origin`, upstream, `custos/` obrigatório) e `--ativo` (ritmo ausente/vencido reprova, mesma semântica do `check-ritmo.sh` da engineering; sem flag segue aviso para não travar o pre-commit).
