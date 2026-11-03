@@ -1,0 +1,6 @@
+{
+  "actions": [
+    { "label": "Archive", "command": "/archive-init", "needs_project": true, "context": "project", "order": 5 },
+    { "label": "Afazeres", "command": "/archive-todos", "needs_project": true, "context": "project", "order": 6 }
+  ]
+}

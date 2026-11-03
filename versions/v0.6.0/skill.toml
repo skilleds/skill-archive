@@ -1,0 +1,12 @@
+slug = "archive"
+name = "schematize-archive"
+tag = "Base · Archive"
+status = "beta"
+order = 23
+current_version = "0.6.0"
+href = "/archive"
+
+[descriptions]
+pt = "O archive da casa como CRITICIDADE 0: guardar o histórico (checklists, planos, decisões/ADRs, handoffs de chat, índice) NÃO é opcional. Materializa o `<projeto>/<projeto>_archive/` obrigatório e GERA AFAZERES pro overdev a partir do histórico recuperável (o que ficou aberto/prometido-e-não-provado)."
+en = "The house archive as CRITICALITY 0: storing history (checklists, plans, decisions/ADRs, chat handoffs, index) is NOT optional. Materializes the mandatory `<project>_archive/` and GENERATES OVERDEV TODOS from the recoverable history (whatever was left open/promised-but-unproven)."
+es = "El archive de la casa como CRITICIDAD 0: guardar el histórico (checklists, planes, decisiones/ADRs, handoffs de chat, índice) NO es opcional. Materializa el `<proyecto>_archive/` obligatorio y GENERA TAREAS para el overdev a partir del histórico recuperable (lo que quedó abierto/prometido-y-no-probado)."
